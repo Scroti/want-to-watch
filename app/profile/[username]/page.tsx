@@ -135,7 +135,7 @@ export default function ProfilePage() {
           <div className="flex items-start gap-3 sm:gap-6">
             <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.display_name || profile.username || profile.user_id || 'User'} fill className="object-cover" />
+                <img src={profile.avatar_url} alt={profile.display_name || profile.username || profile.user_id || 'User'}  className="object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl font-bold">
                   {(profile.display_name || profile.username || profile.user_id || 'U')?.charAt(0).toUpperCase()}
