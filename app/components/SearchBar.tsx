@@ -45,7 +45,6 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for movies or TV shows..."
           className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={isLoading}
         />
         <button
           type="submit"
