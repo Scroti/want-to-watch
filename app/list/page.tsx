@@ -44,6 +44,9 @@ export default function ListPage() {
       const res = await fetch(`/api/wishlist/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setWishlist(prev => prev.filter(item => item.id !== id));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('wishlist:changed'));
+        }
       }
     } catch (error) {
       console.error('Failed to remove item:', error);

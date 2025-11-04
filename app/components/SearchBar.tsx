@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -9,6 +9,25 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [query, setQuery] = useState('');
+  const onSearchRef = useRef(onSearch);
+
+  // Keep latest onSearch without retriggering debounce effect
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
+
+  // Debounced search on each keystroke
+  useEffect(() => {
+    const trimmed = query.trim();
+    const handler = setTimeout(() => {
+      if (trimmed.length >= 2) {
+        onSearchRef.current(trimmed);
+      } else if (trimmed.length === 0) {
+        onSearchRef.current('');
+      }
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [query]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

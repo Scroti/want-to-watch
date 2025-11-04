@@ -59,6 +59,21 @@ export default function BottomNav() {
 
   const isActive = (path: string) => pathname?.startsWith(path);
 
+  // Refresh wishlist count when other pages modify it
+  useEffect(() => {
+    const onWishlistChanged = () => {
+      loadWishlistCount();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('wishlist:changed', onWishlistChanged as EventListener);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('wishlist:changed', onWishlistChanged as EventListener);
+      }
+    };
+  }, []);
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-safe">
       <div className="flex justify-around items-center h-16">
