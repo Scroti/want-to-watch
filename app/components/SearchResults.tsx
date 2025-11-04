@@ -30,6 +30,10 @@ export default function SearchResults({ results, onAdd, addedIds, isLoading }: S
     return `https://image.tmdb.org/t/p/w500${path}`;
   };
 
+  const getTitle = (item: TMDBSearchResult) => {
+    return 'title' in item ? item.title : item.name;
+  };
+
   const getDate = (item: TMDBSearchResult) => {
     return 'release_date' in item ? item.release_date : item.first_air_date;
   };
@@ -53,7 +57,7 @@ export default function SearchResults({ results, onAdd, addedIds, isLoading }: S
               <div className="relative aspect-[2/3] bg-gray-200 dark:bg-gray-700 cursor-pointer">
                 <Image
                   src={getImageUrl(item.poster_path)}
-                  alt={item.title}
+                  alt={getTitle(item)}
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
@@ -64,7 +68,7 @@ export default function SearchResults({ results, onAdd, addedIds, isLoading }: S
             <div className="p-2 sm:p-3 lg:p-4">
               <Link href={`/media/${item.id}-${item.media_type || 'movie'}`}>
                 <h3 className="font-semibold text-xs sm:text-sm md:text-base lg:text-lg mb-1 line-clamp-2 text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
-                  {item.title}
+                  {getTitle(item)}
                 </h3>
               </Link>
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1 sm:mb-2">

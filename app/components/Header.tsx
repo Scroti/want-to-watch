@@ -7,10 +7,12 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 export default function Header() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, userId } = useAuth();
   const { user } = useUser();
   const pathname = usePathname();
   const [mediaTitle, setMediaTitle] = useState<string | null>(null);
+  const [profileUsername, setProfileUsername] = useState<string | null>(null);
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // If we're on a media page, fetch the title
@@ -27,12 +29,33 @@ export default function Header() {
     }
   }, [pathname]);
 
+  // Load app profile to determine correct profile URL and avatar
+  useEffect(() => {
+    if (!userId) return;
+    let isCancelled = false;
+    fetch(`/api/profiles?userId=${userId}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (!isCancelled && data) {
+          setProfileUsername(data.username || null);
+          setProfileAvatarUrl(data.avatar_url || null);
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
+    return () => {
+      isCancelled = true;
+    };
+  }, [userId]);
+
   if (!isSignedIn || !user) {
     return null;
   }
 
   const displayName = user.fullName || user.firstName || user.username || user.primaryEmailAddress?.emailAddress || 'User';
-  const avatarUrl = user.imageUrl || '/placeholder-avatar.png';
+  const avatarUrl = profileAvatarUrl || user.imageUrl || '/placeholder-avatar.png';
+  const profileHref = `/profile/${profileUsername || userId}`;
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
@@ -56,7 +79,7 @@ export default function Header() {
           </div>
           <div className="flex-1 flex justify-end">
             <Link
-              href={user.username ? `/profile/${user.username}` : '/profile/edit'}
+              href={profileHref}
               className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity"
             >
               <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">

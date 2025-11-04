@@ -11,6 +11,9 @@ export default function BottomNav() {
   const { user } = useUser();
   const pathname = usePathname();
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [profileUsername, setProfileUsername] = useState<string | null>(null);
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
+  
 
   useEffect(() => {
     if (userId) {
@@ -31,21 +34,38 @@ export default function BottomNav() {
     }
   };
 
+  // Load app profile for correct profile link and avatar
+  useEffect(() => {
+    if (!userId) return;
+    let isCancelled = false;
+    fetch(`/api/profiles?userId=${userId}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (!isCancelled && data) {
+          setProfileUsername(data.username || null);
+          setProfileAvatarUrl(data.avatar_url || null);
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
+    return () => {
+      isCancelled = true;
+    };
+  }, [userId]);
 
-  const isActive = (path: string) => {
-    if (path === '/' && pathname === '/') {
-      return pathname.includes('#search') || pathname.includes('#wishlist') || (!pathname.includes('/profile') && !pathname.includes('/media'));
-    }
-    return pathname?.startsWith(path);
-  };
+  const profileHref = `/profile/${profileUsername || userId || ''}`;
+
+
+  const isActive = (path: string) => pathname?.startsWith(path);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-safe">
       <div className="flex justify-around items-center h-16">
         <Link
-          href="/#wishlist"
+          href="/list"
           className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-            isActive('/') && (pathname.includes('#wishlist') || (!pathname.includes('#search') && pathname === '/'))
+            isActive('/list')
               ? 'text-blue-600 dark:text-blue-400'
               : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
           }`}
@@ -56,9 +76,9 @@ export default function BottomNav() {
           <span className="text-xs font-medium">List {wishlistCount > 0 && `(${wishlistCount})`}</span>
         </Link>
         <Link
-          href="/#search"
+          href="/search"
           className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-            isActive('/') && pathname.includes('#search')
+            isActive('/search')
               ? 'text-blue-600 dark:text-blue-400'
               : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
           }`}
@@ -69,7 +89,7 @@ export default function BottomNav() {
           <span className="text-xs font-medium">Search</span>
         </Link>
         <Link
-          href={user?.username ? `/profile/${user.username}` : '/profile/edit'}
+          href={profileHref || '/profile/edit'}
           className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
             pathname?.includes('/profile')
               ? 'text-blue-600 dark:text-blue-400'
@@ -77,10 +97,10 @@ export default function BottomNav() {
           }`}
         >
           <div className="relative w-6 h-6 mb-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-            {user?.imageUrl ? (
+            {(profileAvatarUrl || user?.imageUrl) ? (
               <Image
-                src={user.imageUrl}
-                alt={user.fullName || user.username || 'Profile'}
+                src={profileAvatarUrl || user?.imageUrl || ''}
+                alt={user?.fullName || user?.username || 'Profile'}
                 fill
                 className="object-cover"
               />

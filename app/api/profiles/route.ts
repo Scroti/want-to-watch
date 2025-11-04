@@ -17,17 +17,17 @@ export async function GET(request: NextRequest) {
 
     if (username) {
       // Try username first
-      query = query.eq('username', username).single();
+      query = query.eq('username', username);
     } else if (userId) {
-      query = query.eq('user_id', userId).single();
+      query = query.eq('user_id', userId);
     }
 
-    let { data, error } = await query;
+    let { data, error } = await query.single();
 
     // If username lookup fails, try as user_id
     if (error && username && error.code === 'PGRST116') {
-      query = supabaseAdmin.from('profiles').select('*').eq('user_id', username).single();
-      const retryResult = await query;
+      const retryQuery = supabaseAdmin.from('profiles').select('*').eq('user_id', username);
+      const retryResult = await retryQuery.single();
       data = retryResult.data;
       error = retryResult.error;
     }
